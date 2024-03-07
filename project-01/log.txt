@@ -1,0 +1,9 @@
+
+ 1709705164229 : ::1 GET : /api/users
+ 1709705190222 : ::1 POST : /api/users
+ 1709706703192 : ::1 GET : /api/users
+ 1709707076585 : ::1 GET : /api/users
+ 1709707148268 : ::1 GET : /api/users
+ 1709712890296 : ::1 DELETE : /api/users/2
+ 1709712984902 : ::1 PATCH : /api/users/2
+ 1709795870439 : ::1 POST : /api/users
