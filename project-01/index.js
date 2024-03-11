@@ -1,7 +1,8 @@
 const express = require("express");
 const fs = require("fs");
 const mongoose = require("mongoose");
-const users = require("./MOCK_DATA.json");
+const userRouter=require("./routes/user")
+// const users = require("./MOCK_DATA.json");
 const { timeStamp } = require("console");
 const app = express();
 const PORT = 8000;
@@ -37,7 +38,7 @@ const userSchema = new mongoose.Schema(
       type: String,
     },
   },
-  { timeStamp: true }
+  { timestamps : true }
 );
 
 const User = mongoose.model("user", userSchema);
@@ -64,26 +65,29 @@ app.use((req, res, next) => {
   );
 });
 
-app.get("/users", (req, res) => {
+app.get("/users", async (req, res) => {
+  const allDbUsers=await User.find({});
   const html = `
     <ul>
-        ${users.map((users) => `<li>${users.first_name}</li>`).join("")}
+        ${allDbUsers.map((user) => `<li>${user.firstName} - ${user.email}</li>`).join("")}
     </ul>
     `;
   res.send(html);
 });
 
 // REST API
-app.get("/api/users", (req, res) => {
+app.get("/api/users", async (req, res) => {
   // console.log("i am in get route ",req.userName)
+  const allDbUsers=await User.find({});
   res.setHeader("myname", "bheem");
   console.log(req.headers);
-  return res.json(users); //list of users
+  return res.json(allDbUsers); //list of users
 });
 
-app.get("/api/users/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const user = users.find((user) => user.id === id);
+app.get("/api/users/:id", async(req, res) => {
+  // const id = Number(req.params.id);
+  // const user = users.find((user) => user.id === id);
+  const user = await User.findById(req.params.id)
   res.json(user);
 });
 
@@ -119,28 +123,34 @@ app.post("/api/users", async (req, res) => {
 
 
 });
-app.patch("/api/users/:id", (req, res) => {
+app.patch("/api/users/:id", async (req, res) => {
+  await User.findByIdAndUpdate(req.params.id,{ lastName:"Changed"})
   // console.log(req.params,"rrr");
-  let { id } = req.params;
-  console.log(req.body, "hehehe");
+  // let { id } = req.params;
+  // console.log(req.body, "hehehe");
 
-  let newARR = users.find((data) => {
-    return data.id == id;
-  });
-  // newARR.id=req.body.id
-  console.log(newARR, "neee");
-  // console.log(req.body.id,"rrrr");
-  newARR.first_name = req.body.first_name;
-  console.log(newARR, "updatedddd");
+  // let newARR = users.find((data) => {
+  //   return data.id == id;
+  // });
+  // // newARR.id=req.body.id
+  // console.log(newARR, "neee");
+  // // console.log(req.body.id,"rrrr");
+  // newARR.first_name = req.body.first_name;
+  // console.log(newARR, "updatedddd");
 
-  res.send(newARR);
+  // res.send(newARR);
+  return res.json({status : "Success"})
 });
-app.delete("/api/users/:id", (req, res) => {
-  let { id } = req.params;
-  let newARR = users.filter((data, key) => {
-    return data.id != id;
-  });
-  res.send(newARR);
+app.delete("/api/users/:id", async(req, res) => {
+  await User.findByIdAndDelete(req.params.id)
+  return res.json({status : "success"})
+
+
+  // let { id } = req.params;
+  // let newARR = users.filter((data, key) => {
+  //   return data.id != id;
+  // });
+  // res.send(newARR);
 
   // return res.json({status : "pending"});
 });
@@ -156,5 +166,8 @@ app.delete("/api/users/:id", (req, res) => {
 // .delete((req,res)=>{
 //   return res.json({status : pending});
 // })
+
+
+
 
 app.listen(PORT, () => console.log("sever chal pda"));
