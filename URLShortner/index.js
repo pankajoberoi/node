@@ -1,7 +1,12 @@
 const express = require("express");
 const { connectToMongoDb } = require("./connect");
+const path = require('path')//inbuilt
 const urlRoute = require("./routes/url");
 const URL=require("./model/user")
+const staticRoute = require('./routes/staticRouter')
+
+
+
 const app = express();
 const PORT = 8001;
 
@@ -10,10 +15,26 @@ connectToMongoDb("mongodb://127.0.0.1:27017/short-url").then(()=>{
 })
 
 app.use(express.json())
+app.use(express.urlencoded({extended:false}))
+
+
+
+app.set("view engine","ejs")//view engine -> ejs
+app.set("views",path.resolve('./views'))   
+// view ki files are this ->views folder
+
+app.get("/test",async (req,res)=>{
+    const allUrls=await URL.find({});
+    return res.render("home",{
+        // we can also pass variables here
+        urls:allUrls,
+    })
+})
 
 app.use("/url", urlRoute);
+app.use("/",staticRoute)
 
-app.get('/:shortId', async (req,res)=>{
+app.get('/url/:shortId', async (req,res)=>{
     const shortId=req.params.shortId;
     const entry=await URL.findOneAndUpdate({
         shortId
